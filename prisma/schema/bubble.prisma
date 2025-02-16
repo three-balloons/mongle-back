@@ -1,0 +1,17 @@
+model Bubble {
+    id          Int       @id @default(autoincrement())
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    deletedAt   DateTime?
+    name        String
+    top         Int
+    left        Int
+    width       Int
+    height      Int
+    path        String
+    pathDepth   Int
+    workspaceId Int
+    workspace   Workspace @relation(fields: [workspaceId], references: [id])
+    curves      Curve[]
+    pictures    Picture[]
+}
