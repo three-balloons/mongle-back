@@ -1,0 +1,11 @@
+model Curve {
+    id        Int       @id @default(autoincrement())
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+    color     String
+    position  String
+    thickness Int
+    bubbleId  Int
+    Bubble    Bubble    @relation(fields: [bubbleId], references: [id])
+}

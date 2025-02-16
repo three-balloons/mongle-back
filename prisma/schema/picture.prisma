@@ -1,0 +1,17 @@
+model Picture {
+    id         Int       @id @default(autoincrement())
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+    deletedAt  DateTime?
+    angle      Int
+    top        Int
+    left       Int
+    width      Int
+    height     Int
+    isFlippedX Boolean
+    isFlippedY Boolean
+    bubbleId   Int
+    Bubble     Bubble    @relation(fields: [bubbleId], references: [id])
+    fileId     Int       @unique
+    file       File      @relation(fields: [fileId], references: [id])
+}

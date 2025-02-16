@@ -1,0 +1,10 @@
+model File {
+    id        Int       @id @default(autoincrement())
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+    path      String
+    size      Float
+    type      String
+    picture   Picture?
+}
