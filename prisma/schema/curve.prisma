@@ -7,5 +7,5 @@ model Curve {
     position  String
     thickness Int
     bubbleId  Int
-    Bubble    Bubble    @relation(fields: [bubbleId], references: [id])
+    bubble    Bubble    @relation(fields: [bubbleId], references: [id])
 }
