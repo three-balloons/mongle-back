@@ -1,5 +1,4 @@
 import { Workspace } from '@prisma/client';
-import { Expose } from 'class-transformer';
 
 export class WorkspaceResponseDto {
   constructor(workspace: Workspace) {

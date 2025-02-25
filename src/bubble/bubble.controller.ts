@@ -7,15 +7,16 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { BubbleService } from './bubble.service';
-import { CreateBubbleDto } from './dto/create-bubble.dto';
-import { UpdateBubbleDto } from './dto/update-bubble.dto';
 import { WorkspaceGuard } from 'src/workspace/guard/workspace.guard';
 import { JwtAuthGuard } from 'src/user/guard/jwt.guard';
 import { ApiBearerAuth, ApiHeader, ApiSecurity } from '@nestjs/swagger';
 import { Workspace } from '@prisma/client';
 import { GetWorkspace } from 'src/utils/decorator/get-workspace.decorator';
+import { PostBubbleDto } from './dto/request/post-bubble.dto';
+import { GlobalResponseDto } from 'src/utils/dto/response.dto';
 
 @Controller('api/bubbles')
 @UseGuards(JwtAuthGuard, WorkspaceGuard)
@@ -29,27 +30,26 @@ export class BubbleController {
   constructor(private readonly bubbleService: BubbleService) {}
 
   @Post()
-  create(@Body() createBubbleDto: CreateBubbleDto) {
-    return this.bubbleService.create(createBubbleDto);
+  async postBubble(
+    @GetWorkspace() workspace: Workspace,
+    @Body() postBubbleDto: PostBubbleDto,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.postBubble(workspace, postBubbleDto);
   }
 
-  @Get()
-  findAll(@GetWorkspace() workspace: Workspace) {
-    return this.bubbleService.findAll();
+  @Delete('/:bubbleId')
+  async deleteBubbleById(
+    @GetWorkspace() workspace: Workspace,
+    @Param('bubbleId') bubbleId: number,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.deleteBubbleById(workspace, bubbleId);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.bubbleService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBubbleDto: UpdateBubbleDto) {
-    return this.bubbleService.update(+id, updateBubbleDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bubbleService.remove(+id);
+  @Patch('/:bubbleId/restore')
+  async restoreBubbleById(
+    @GetWorkspace() workspace: Workspace,
+    @Param('bubbleId') bubbleId: number,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.restoreBubbleById(workspace, bubbleId);
   }
 }
