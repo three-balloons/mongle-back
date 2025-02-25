@@ -1,26 +1,53 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { PutUserDto } from './dto/request/put-user.dto';
+import { GlobalResponseDto } from 'src/utils/dto/response.dto';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findByOAuthId(oAuthId: string): Promise<User> {
+    return await this.prisma.user.findFirst({
+      where: { oAuthId, deletedAt: null },
+    });
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async putUser(
+    user: User,
+    putUserDto: PutUserDto,
+  ): Promise<GlobalResponseDto> {
+    const { name, email } = putUserDto;
+
+    const updatedUser = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        name,
+        email,
+      },
+    });
+    const { oAuthId, refreshToken, ...filteredUser } = updatedUser;
+    return new GlobalResponseDto('OK', '', filteredUser);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async deleteUser(user: User): Promise<GlobalResponseDto> {
+    const deletedUser = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+
+    return new GlobalResponseDto('OK', '', { id: deletedUser.id });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+  async restoreUser(userId: number): Promise<GlobalResponseDto> {
+    const restoredUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: { deletedAt: null },
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    return new GlobalResponseDto('OK', '', { id: restoredUser.id });
   }
 }

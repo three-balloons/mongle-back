@@ -1,34 +1,53 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from './guard/jwt.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { GlobalResponseDto } from 'src/utils/dto/response.dto';
+import { GetUser } from 'src/utils/decorator/get-user.decorator';
+import { PutUserDto } from './dto/request/put-user.dto';
 
-@Controller('user')
+@Controller('api/users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
-
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('jwt')
+  getUser(@GetUser() user): GlobalResponseDto {
+    const { oAuthId, refreshToken, ...filteredUser } = user;
+    return new GlobalResponseDto('OK', '', filteredUser);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  @Put()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('jwt')
+  async putUser(
+    @GetUser() user,
+    @Body() putUserDto: PutUserDto,
+  ): Promise<GlobalResponseDto> {
+    return await this.userService.putUser(user, putUserDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Delete()
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('jwt')
+  async deleteUser(@GetUser() user): Promise<GlobalResponseDto> {
+    return await this.userService.deleteUser(user);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @Patch('/:userId/restore')
+  async restoreUser(
+    @Param('userId') userId: number,
+  ): Promise<GlobalResponseDto> {
+    return await this.userService.restoreUser(userId);
   }
 }

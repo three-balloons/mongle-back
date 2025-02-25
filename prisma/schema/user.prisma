@@ -3,8 +3,8 @@ model User {
     email        String      @unique
     provider     String
     name         String
-    oauthId      String
-    refreshToken String
+    oAuthId      String
+    refreshToken String?
     createdAt    DateTime    @default(now())
     updatedAt    DateTime    @updatedAt
     deletedAt    DateTime?
