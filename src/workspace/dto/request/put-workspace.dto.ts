@@ -6,7 +6,7 @@ export class PutWorkspaceDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ example: 'Blue' })
+  @ApiProperty({ example: 'blue' })
   @IsString()
   theme: string;
 }

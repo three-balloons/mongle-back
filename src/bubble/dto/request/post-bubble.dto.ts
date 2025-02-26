@@ -1,20 +1,32 @@
 import { BadRequestException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsNumber, IsString } from 'class-validator';
+import {
+  IsNumber,
+  IsString,
+  Validate,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator';
 
-export class PostBubbleDto {
-  @ApiProperty({ example: '/Bubble1/Bubble3' })
-  @IsString()
-  @Transform(({ value }) => {
+@ValidatorConstraint({ name: 'IsValidPath', async: false })
+export class ValidatePathConstraint implements ValidatorConstraintInterface {
+  validate(value: string, args: ValidationArguments) {
     if (value.length > 255) {
       throw new BadRequestException('BUBBLE: PATH TOO LONG');
     }
     if (!value.includes('/') || value.endsWith('/')) {
       throw new BadRequestException('BUBBLE: WRONG PATH');
     }
-    return value;
-  })
+    return true;
+  }
+}
+
+export class PostBubbleDto {
+  @ApiProperty({ example: '/Bubble1/Bubble3' })
+  @IsString()
+  @Validate(ValidatePathConstraint)
   path: string;
 
   @ApiProperty({ example: '버블 이름' })
