@@ -12,7 +12,12 @@ import {
 import { BubbleService } from './bubble.service';
 import { WorkspaceGuard } from 'src/workspace/guard/workspace.guard';
 import { JwtAuthGuard } from 'src/user/guard/jwt.guard';
-import { ApiBearerAuth, ApiHeader, ApiSecurity } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiHeader,
+  ApiQuery,
+  ApiSecurity,
+} from '@nestjs/swagger';
 import { Workspace } from '@prisma/client';
 import { GetWorkspace } from 'src/utils/decorator/get-workspace.decorator';
 import { PostBubbleDto } from './dto/request/post-bubble.dto';
@@ -51,5 +56,31 @@ export class BubbleController {
     @Param('bubbleId') bubbleId: number,
   ): Promise<GlobalResponseDto> {
     return await this.bubbleService.restoreBubbleById(workspace, bubbleId);
+  }
+
+  @Get()
+  @ApiQuery({ name: 'pathDepth', required: false })
+  async getBubbles(
+    @GetWorkspace() workspace: Workspace,
+    @Query('pathDepth') pathDepth?: number,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.getBubbles(
+      workspace,
+      pathDepth !== undefined ? pathDepth : undefined,
+    );
+  }
+
+  @Get('/:bubbleId')
+  @ApiQuery({ name: 'pathDepth', required: false })
+  async getBubbleById(
+    @GetWorkspace() workspace: Workspace,
+    @Param('bubbleId') bubbleId: number,
+    @Query('pathDepth') pathDepth?: number,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.getBubbleById(
+      workspace,
+      bubbleId,
+      pathDepth !== undefined ? pathDepth : undefined,
+    );
   }
 }

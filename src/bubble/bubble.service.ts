@@ -7,6 +7,11 @@ import { Bubble, Workspace } from '@prisma/client';
 import { PostBubbleDto } from './dto/request/post-bubble.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
+import {
+  BubbleWithCurvesAndPictures,
+  bubbleWithCurvesAndPictures,
+  Shape,
+} from './utils/types';
 import { BubbleResponseDto } from './dto/response/bubble-response.dto';
 
 @Injectable()
@@ -181,5 +186,129 @@ export class BubbleService {
 
       return new GlobalResponseDto('OK', '', { id: bubbleId });
     });
+  }
+
+  async getBubbles(
+    workspace: Workspace,
+    pathDepth?: number,
+  ): Promise<GlobalResponseDto> {
+    const whereCondition: any = {
+      workspaceId: workspace.id,
+    };
+
+    if (pathDepth !== undefined) {
+      if (pathDepth < 1 || pathDepth > 5) {
+        throw new BadRequestException('BUBBLE: WRONG PATH DEPTH');
+      }
+      whereCondition.pathDepth = { lt: pathDepth };
+    }
+
+    const bubbles: BubbleWithCurvesAndPictures[] =
+      await this.prisma.bubble.findMany({
+        where: whereCondition,
+        orderBy: { pathDepth: 'asc' },
+        ...bubbleWithCurvesAndPictures,
+      });
+
+    const transformedBubbles = bubbles.map(
+      ({ curves, pictures, ...bubble }) => {
+        const shapes: Shape[] = [
+          ...curves.map((curve) => ({
+            id: curve.id,
+            updatedAt: curve.updatedAt,
+            type: 'Curve',
+            position: curve.position,
+            config: {
+              color: curve.color,
+              thickness: curve.thickness,
+            },
+          })),
+          ...pictures.map((picture) => ({
+            id: picture.id,
+            updatedAt: picture.updatedAt,
+            type: 'Picture',
+            angle: picture.angle,
+            top: picture.top,
+            left: picture.left,
+            width: picture.width,
+            height: picture.height,
+            isFlippedX: picture.isFlippedX,
+            isFlippedY: picture.isFlippedY,
+            fileId: picture.fileId,
+          })),
+        ].sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime());
+
+        return new BubbleResponseDto(bubble, shapes);
+      },
+    );
+
+    return new GlobalResponseDto('OK', '', transformedBubbles);
+  }
+
+  async getBubbleById(
+    workspace: Workspace,
+    bubbleId: number,
+    pathDepth?: number,
+  ) {
+    const bubble: Bubble = await this.prisma.bubble.findUnique({
+      where: { workspaceId: workspace.id, id: bubbleId },
+    });
+
+    if (!bubble) {
+      throw new NotFoundException('BUBBLE: BUBBLE NOT FOUND');
+    }
+
+    const whereCondition: any = {
+      workspaceId: workspace.id,
+      OR: [{ path: bubble.path }, { path: { startsWith: bubble.path + '/' } }],
+    };
+
+    if (pathDepth !== undefined) {
+      if (pathDepth < 1 || pathDepth > 5) {
+        throw new BadRequestException('BUBBLE: WRONG PATH DEPTH');
+      }
+      whereCondition.pathDepth = { lt: bubble.pathDepth + pathDepth };
+    }
+
+    const bubbles: BubbleWithCurvesAndPictures[] =
+      await this.prisma.bubble.findMany({
+        where: whereCondition,
+        orderBy: { pathDepth: 'asc' },
+        ...bubbleWithCurvesAndPictures,
+      });
+
+    const transformedBubbles = bubbles.map(
+      ({ curves, pictures, ...bubble }) => {
+        const shapes: Shape[] = [
+          ...curves.map((curve) => ({
+            id: curve.id,
+            updatedAt: curve.updatedAt,
+            type: 'Curve',
+            position: curve.position,
+            config: {
+              color: curve.color,
+              thickness: curve.thickness,
+            },
+          })),
+          ...pictures.map((picture) => ({
+            id: picture.id,
+            updatedAt: picture.updatedAt,
+            type: 'Picture',
+            angle: picture.angle,
+            top: picture.top,
+            left: picture.left,
+            width: picture.width,
+            height: picture.height,
+            isFlippedX: picture.isFlippedX,
+            isFlippedY: picture.isFlippedY,
+            fileId: picture.fileId,
+          })),
+        ].sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime());
+
+        return new BubbleResponseDto(bubble, shapes);
+      },
+    );
+
+    return new GlobalResponseDto('OK', '', transformedBubbles);
   }
 }

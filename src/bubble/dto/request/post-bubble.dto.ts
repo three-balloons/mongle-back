@@ -1,6 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
 import {
   IsNumber,
   IsString,
@@ -11,7 +10,7 @@ import {
 } from 'class-validator';
 
 @ValidatorConstraint({ name: 'IsValidPath', async: false })
-export class ValidatePathConstraint implements ValidatorConstraintInterface {
+class ValidatePathConstraint implements ValidatorConstraintInterface {
   validate(value: string, args: ValidationArguments) {
     if (value.length > 255) {
       throw new BadRequestException('BUBBLE: PATH TOO LONG');
