@@ -13,6 +13,7 @@ import {
   Shape,
 } from './utils/types';
 import { BubbleResponseDto } from './dto/response/bubble-response.dto';
+import { PutBubbleDto } from './dto/request/put-bubble.dto';
 
 @Injectable()
 export class BubbleService {
@@ -310,5 +311,112 @@ export class BubbleService {
     );
 
     return new GlobalResponseDto('OK', '', transformedBubbles);
+  }
+
+  async putBubbleById(
+    workspace: Workspace,
+    bubbleId: number,
+    putBubbleDto: PutBubbleDto,
+  ): Promise<GlobalResponseDto> {
+    return this.prisma.$transaction(async (prisma) => {
+      const bubble: Bubble = await prisma.bubble.findUnique({
+        where: { workspaceId: workspace.id, id: bubbleId },
+      });
+
+      if (!bubble) {
+        throw new NotFoundException('BUBBLE: BUBBLE NOT FOUND');
+      }
+
+      const { newPath, name, top, left, width, height } = putBubbleDto;
+
+      if (!(newPath === undefined || newPath === null || newPath === '')) {
+        const tempBubble: Bubble = await prisma.bubble.findFirst({
+          where: { workspaceId: workspace.id, path: newPath },
+        });
+
+        if (tempBubble) {
+          throw new BadRequestException('BUBBLE: ALREADY EXISTS');
+        }
+
+        const parentPath: string = newPath.substring(
+          0,
+          newPath.lastIndexOf('/'),
+        );
+
+        let parentBubble: Bubble;
+        if (parentPath !== '') {
+          parentBubble = await prisma.bubble.findFirst({
+            where: { workspaceId: workspace.id, path: parentPath },
+          });
+
+          if (!parentBubble) {
+            throw new NotFoundException('BUBBLE: PARENT NOT FOUND');
+          }
+        }
+
+        const affectedBubbles: Bubble[] = await prisma.bubble.findMany({
+          where: {
+            workspaceId: workspace.id,
+            OR: [
+              { path: bubble.path },
+              { path: { startsWith: bubble.path + '/' } },
+            ],
+          },
+        });
+
+        await Promise.all(
+          affectedBubbles.map(async (b) => {
+            const newBubblePath =
+              newPath + b.path.substring(bubble.path.length);
+            const newPathDepth = newBubblePath.split('/').length - 1;
+
+            await prisma.bubble.update({
+              where: { id: b.id },
+              data: { path: newBubblePath, pathDepth: newPathDepth },
+            });
+          }),
+        );
+      }
+
+      const updatedBubble = await prisma.bubble.update({
+        where: { id: bubble.id },
+        data: { name, top, left, width, height },
+        ...bubbleWithCurvesAndPictures,
+      });
+
+      const { curves, pictures, ...bubbleData } = updatedBubble;
+
+      const shapes: Shape[] = [
+        ...curves.map((curve) => ({
+          id: curve.id,
+          updatedAt: curve.updatedAt,
+          type: 'Curve',
+          position: curve.position,
+          config: {
+            color: curve.color,
+            thickness: curve.thickness,
+          },
+        })),
+        ...pictures.map((picture) => ({
+          id: picture.id,
+          updatedAt: picture.updatedAt,
+          type: 'Picture',
+          angle: picture.angle,
+          top: picture.top,
+          left: picture.left,
+          width: picture.width,
+          height: picture.height,
+          isFlippedX: picture.isFlippedX,
+          isFlippedY: picture.isFlippedY,
+          fileId: picture.fileId,
+        })),
+      ].sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime());
+
+      return new GlobalResponseDto(
+        'OK',
+        '',
+        new BubbleResponseDto(bubbleData, shapes),
+      );
+    });
   }
 }

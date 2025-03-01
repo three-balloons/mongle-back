@@ -1,7 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsNumber,
+  IsOptional,
   IsString,
   Validate,
   ValidationArguments,
@@ -9,9 +10,12 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-@ValidatorConstraint({ name: 'IsValidPostPath', async: false })
+@ValidatorConstraint({ name: 'IsValidPutPath', async: false })
 class ValidatePathConstraint implements ValidatorConstraintInterface {
-  validate(value: string, args: ValidationArguments) {
+  validate(value: string | null | undefined, args: ValidationArguments) {
+    if (value === undefined || value === null || value === '') {
+      return true;
+    }
     if (value.length > 255) {
       throw new BadRequestException('BUBBLE: PATH TOO LONG');
     }
@@ -21,30 +25,30 @@ class ValidatePathConstraint implements ValidatorConstraintInterface {
     return true;
   }
 }
-
-export class PostBubbleDto {
-  @ApiProperty({ example: '/Bubble1/Bubble3' })
+export class PutBubbleDto {
+  @ApiPropertyOptional({ example: '/Bubble1/Bubble3' })
   @IsString()
+  @IsOptional()
   @Validate(ValidatePathConstraint)
-  path: string;
+  newPath?: string;
 
-  @ApiProperty({ example: '버블 이름' })
+  @ApiProperty({ example: '수정할 버블 이름' })
   @IsString()
   name: string;
 
-  @ApiProperty({ example: '100' })
+  @ApiProperty({ example: '50' })
   @IsNumber()
   top: number;
 
-  @ApiProperty({ example: '100' })
+  @ApiProperty({ example: '120' })
   @IsNumber()
   left: number;
 
-  @ApiProperty({ example: '100' })
+  @ApiProperty({ example: '-100' })
   @IsNumber()
   width: number;
 
-  @ApiProperty({ example: '100' })
+  @ApiProperty({ example: '0' })
   @IsNumber()
   height: number;
 }

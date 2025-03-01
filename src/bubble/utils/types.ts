@@ -39,7 +39,7 @@ export type Shape = {
     }
 );
 
-export type CurveConfig = {
+type CurveConfig = {
   color: string;
   thickness: number;
 };

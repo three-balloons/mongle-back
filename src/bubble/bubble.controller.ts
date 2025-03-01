@@ -8,20 +8,17 @@ import {
   Delete,
   UseGuards,
   Query,
+  Put,
 } from '@nestjs/common';
 import { BubbleService } from './bubble.service';
 import { WorkspaceGuard } from 'src/workspace/guard/workspace.guard';
 import { JwtAuthGuard } from 'src/user/guard/jwt.guard';
-import {
-  ApiBearerAuth,
-  ApiHeader,
-  ApiQuery,
-  ApiSecurity,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader, ApiQuery } from '@nestjs/swagger';
 import { Workspace } from '@prisma/client';
 import { GetWorkspace } from 'src/utils/decorator/get-workspace.decorator';
 import { PostBubbleDto } from './dto/request/post-bubble.dto';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
+import { PutBubbleDto } from './dto/request/put-bubble.dto';
 
 @Controller('api/bubbles')
 @UseGuards(JwtAuthGuard, WorkspaceGuard)
@@ -81,6 +78,19 @@ export class BubbleController {
       workspace,
       bubbleId,
       pathDepth !== undefined ? pathDepth : undefined,
+    );
+  }
+
+  @Put('/:bubbleId')
+  async putBubbleById(
+    @GetWorkspace() workspace: Workspace,
+    @Param('bubbleId') bubbleId: number,
+    @Body() putBubbleDto: PutBubbleDto,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.putBubbleById(
+      workspace,
+      bubbleId,
+      putBubbleDto,
     );
   }
 }
