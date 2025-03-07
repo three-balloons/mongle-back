@@ -214,29 +214,33 @@ export class BubbleService {
     const transformedBubbles = bubbles.map(
       ({ curves, pictures, ...bubble }) => {
         const shapes: Shape[] = [
-          ...curves.map((curve) => ({
-            id: curve.id,
-            updatedAt: curve.updatedAt,
-            type: 'Curve',
-            position: curve.position,
-            config: {
-              color: curve.color,
-              thickness: curve.thickness,
-            },
-          })),
-          ...pictures.map((picture) => ({
-            id: picture.id,
-            updatedAt: picture.updatedAt,
-            type: 'Picture',
-            angle: picture.angle,
-            top: picture.top,
-            left: picture.left,
-            width: picture.width,
-            height: picture.height,
-            isFlippedX: picture.isFlippedX,
-            isFlippedY: picture.isFlippedY,
-            fileId: picture.fileId,
-          })),
+          ...curves
+            .filter((curve) => curve.deletedAt === null)
+            .map((curve) => ({
+              id: curve.id,
+              updatedAt: curve.updatedAt,
+              type: 'Curve',
+              position: curve.position,
+              config: {
+                color: curve.color,
+                thickness: curve.thickness,
+              },
+            })),
+          ...pictures
+            .filter((picture) => picture.deletedAt === null)
+            .map((picture) => ({
+              id: picture.id,
+              updatedAt: picture.updatedAt,
+              type: 'Picture',
+              angle: picture.angle,
+              top: picture.top,
+              left: picture.left,
+              width: picture.width,
+              height: picture.height,
+              isFlippedX: picture.isFlippedX,
+              isFlippedY: picture.isFlippedY,
+              fileId: picture.fileId,
+            })),
         ].sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime());
 
         return new BubbleResponseDto(bubble, shapes);
@@ -281,29 +285,33 @@ export class BubbleService {
     const transformedBubbles = bubbles.map(
       ({ curves, pictures, ...bubble }) => {
         const shapes: Shape[] = [
-          ...curves.map((curve) => ({
-            id: curve.id,
-            updatedAt: curve.updatedAt,
-            type: 'Curve',
-            position: curve.position,
-            config: {
-              color: curve.color,
-              thickness: curve.thickness,
-            },
-          })),
-          ...pictures.map((picture) => ({
-            id: picture.id,
-            updatedAt: picture.updatedAt,
-            type: 'Picture',
-            angle: picture.angle,
-            top: picture.top,
-            left: picture.left,
-            width: picture.width,
-            height: picture.height,
-            isFlippedX: picture.isFlippedX,
-            isFlippedY: picture.isFlippedY,
-            fileId: picture.fileId,
-          })),
+          ...curves
+            .filter((curve) => curve.deletedAt === null)
+            .map((curve) => ({
+              id: curve.id,
+              updatedAt: curve.updatedAt,
+              type: 'Curve',
+              position: curve.position,
+              config: {
+                color: curve.color,
+                thickness: curve.thickness,
+              },
+            })),
+          ...pictures
+            .filter((picture) => picture.deletedAt === null)
+            .map((picture) => ({
+              id: picture.id,
+              updatedAt: picture.updatedAt,
+              type: 'Picture',
+              angle: picture.angle,
+              top: picture.top,
+              left: picture.left,
+              width: picture.width,
+              height: picture.height,
+              isFlippedX: picture.isFlippedX,
+              isFlippedY: picture.isFlippedY,
+              fileId: picture.fileId,
+            })),
         ].sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime());
 
         return new BubbleResponseDto(bubble, shapes);
@@ -387,29 +395,33 @@ export class BubbleService {
       const { curves, pictures, ...bubbleData } = updatedBubble;
 
       const shapes: Shape[] = [
-        ...curves.map((curve) => ({
-          id: curve.id,
-          updatedAt: curve.updatedAt,
-          type: 'Curve',
-          position: curve.position,
-          config: {
-            color: curve.color,
-            thickness: curve.thickness,
-          },
-        })),
-        ...pictures.map((picture) => ({
-          id: picture.id,
-          updatedAt: picture.updatedAt,
-          type: 'Picture',
-          angle: picture.angle,
-          top: picture.top,
-          left: picture.left,
-          width: picture.width,
-          height: picture.height,
-          isFlippedX: picture.isFlippedX,
-          isFlippedY: picture.isFlippedY,
-          fileId: picture.fileId,
-        })),
+        ...curves
+          .filter((curve) => curve.deletedAt === null)
+          .map((curve) => ({
+            id: curve.id,
+            updatedAt: curve.updatedAt,
+            type: 'Curve',
+            position: curve.position,
+            config: {
+              color: curve.color,
+              thickness: curve.thickness,
+            },
+          })),
+        ...pictures
+          .filter((picture) => picture.deletedAt === null)
+          .map((picture) => ({
+            id: picture.id,
+            updatedAt: picture.updatedAt,
+            type: 'Picture',
+            angle: picture.angle,
+            top: picture.top,
+            left: picture.left,
+            width: picture.width,
+            height: picture.height,
+            isFlippedX: picture.isFlippedX,
+            isFlippedY: picture.isFlippedY,
+            fileId: picture.fileId,
+          })),
       ].sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime());
 
       return new GlobalResponseDto(

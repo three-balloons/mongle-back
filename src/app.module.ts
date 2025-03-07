@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { BubbleModule } from './bubble/bubble.module';
+import { CurveModule } from './curve/curve.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { BubbleModule } from './bubble/bubble.module';
       isGlobal: true,
     }),
     BubbleModule,
+    CurveModule,
   ],
   controllers: [AppController],
   providers: [AppService],
