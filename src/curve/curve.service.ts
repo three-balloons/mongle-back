@@ -19,7 +19,7 @@ export class CurveService {
 
     const result = await this.prisma.$transaction(async (tx) => {
       const bubble = await tx.bubble.findUnique({
-        where: { id: bubbleId, workspaceId: workspace.id },
+        where: { id: bubbleId, workspaceId: workspace.id, deletedAt: null },
       });
 
       if (!bubble) {
@@ -58,7 +58,7 @@ export class CurveService {
 
     const result = await this.prisma.$transaction(async (tx) => {
       const bubble = await tx.bubble.findUnique({
-        where: { id: bubbleId, workspaceId: workspace.id },
+        where: { id: bubbleId, workspaceId: workspace.id, deletedAt: null },
       });
 
       if (!bubble) {
