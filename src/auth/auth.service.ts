@@ -12,6 +12,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from '@prisma/client';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
 
+const testOAuthId = '12345test';
+const testEmail = 'test@test.com';
+const testUser = 'TestUser';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -139,7 +143,7 @@ export class AuthService {
   }
 
   async postTestAccessToken(): Promise<GlobalResponseDto> {
-    const result: string[] = ['12345test', 'test@test.com', 'TestUser'];
+    const result: string[] = [testOAuthId, testEmail, testUser];
 
     const accessToken: string = await this.checkAndSaveUserAndReturnToken(
       'Test',

@@ -1,19 +1,5 @@
-import { Prisma } from '@prisma/client';
+import { BubbleWithCurvesAndPictures } from './prisma-types';
 
-// Type For Prisma Include
-export type BubbleWithCurvesAndPictures = Prisma.BubbleGetPayload<
-  typeof bubbleWithCurvesAndPictures
->;
-
-export const bubbleWithCurvesAndPictures =
-  Prisma.validator<Prisma.BubbleDefaultArgs>()({
-    include: {
-      curves: true,
-      pictures: true,
-    },
-  });
-
-// Type For Formatting Response
 export type BubbleWithShapes = Omit<
   BubbleWithCurvesAndPictures,
   'curves' | 'pictures'

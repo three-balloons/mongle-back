@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Param,
   Post,
   Query,
   UploadedFile,
@@ -52,7 +53,7 @@ export class FileController {
   async getFileById(
     @GetUser() user: User,
     @GetWorkspace() workspace: Workspace,
-    @Query('fileId') fileId: number,
+    @Param('fileId') fileId: number,
   ): Promise<GlobalResponseDto> {
     return await this.fileService.getFileById(user, workspace, fileId);
   }

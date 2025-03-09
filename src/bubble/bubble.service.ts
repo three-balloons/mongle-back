@@ -7,13 +7,13 @@ import { Bubble, Workspace } from '@prisma/client';
 import { PostBubbleDto } from './dto/request/post-bubble.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
-import {
-  BubbleWithCurvesAndPictures,
-  bubbleWithCurvesAndPictures,
-  Shape,
-} from './utils/types';
+import { Shape } from './utils/types';
 import { BubbleResponseDto } from './dto/response/bubble-response.dto';
 import { PutBubbleDto } from './dto/request/put-bubble.dto';
+import {
+  bubbleWithCurvesAndPictures,
+  BubbleWithCurvesAndPictures,
+} from './utils/prisma-types';
 
 @Injectable()
 export class BubbleService {
@@ -102,31 +102,25 @@ export class BubbleService {
         throw new NotFoundException('BUBBLE: BUBBLE NOT FOUND');
       }
 
-      await prisma.bubble.update({
-        where: { id: bubbleId },
-        data: {
-          deletedAt: new Date(),
-          pictures: {
-            updateMany: {
-              where: {},
-              data: { deletedAt: new Date() },
-            },
-          },
-          curves: {
-            updateMany: {
-              where: {},
-              data: { deletedAt: new Date() },
-            },
-          },
-        },
+      const bubblePathsCondition = {
+        OR: [
+          { path: bubble.path },
+          { path: { startsWith: bubble.path + '/' } },
+        ],
+      };
+
+      await prisma.bubble.updateMany({
+        where: bubblePathsCondition,
+        data: { deletedAt: new Date() },
       });
 
-      await prisma.file.updateMany({
-        where: {
-          picture: {
-            bubbleId,
-          },
-        },
+      await prisma.picture.updateMany({
+        where: { bubble: bubblePathsCondition },
+        data: { deletedAt: new Date() },
+      });
+
+      await prisma.curve.updateMany({
+        where: { bubble: bubblePathsCondition },
         data: { deletedAt: new Date() },
       });
 
@@ -152,31 +146,25 @@ export class BubbleService {
         throw new NotFoundException('BUBBLE: BUBBLE NOT FOUND');
       }
 
-      await prisma.bubble.update({
-        where: { id: bubbleId },
-        data: {
-          deletedAt: null,
-          pictures: {
-            updateMany: {
-              where: {},
-              data: { deletedAt: null },
-            },
-          },
-          curves: {
-            updateMany: {
-              where: {},
-              data: { deletedAt: null },
-            },
-          },
-        },
+      const bubblePathsCondition = {
+        OR: [
+          { path: bubble.path },
+          { path: { startsWith: bubble.path + '/' } },
+        ],
+      };
+
+      await prisma.bubble.updateMany({
+        where: bubblePathsCondition,
+        data: { deletedAt: null },
       });
 
-      await prisma.file.updateMany({
-        where: {
-          picture: {
-            bubbleId,
-          },
-        },
+      await prisma.picture.updateMany({
+        where: { bubble: bubblePathsCondition },
+        data: { deletedAt: null },
+      });
+
+      await prisma.curve.updateMany({
+        where: { bubble: bubblePathsCondition },
         data: { deletedAt: null },
       });
 
@@ -184,7 +172,6 @@ export class BubbleService {
         where: { uuid: workspace.uuid },
         data: { updatedAt: new Date() },
       });
-
       return new GlobalResponseDto('OK', '', { id: bubbleId });
     });
   }
@@ -195,6 +182,7 @@ export class BubbleService {
   ): Promise<GlobalResponseDto> {
     const whereCondition: any = {
       workspaceId: workspace.id,
+      deletedAt: null,
     };
 
     if (pathDepth !== undefined) {
@@ -256,7 +244,7 @@ export class BubbleService {
     pathDepth?: number,
   ) {
     const bubble: Bubble = await this.prisma.bubble.findUnique({
-      where: { workspaceId: workspace.id, id: bubbleId },
+      where: { workspaceId: workspace.id, id: bubbleId, deletedAt: null },
     });
 
     if (!bubble) {
@@ -328,7 +316,7 @@ export class BubbleService {
   ): Promise<GlobalResponseDto> {
     return this.prisma.$transaction(async (prisma) => {
       const bubble: Bubble = await prisma.bubble.findUnique({
-        where: { workspaceId: workspace.id, id: bubbleId },
+        where: { workspaceId: workspace.id, id: bubbleId, deletedAt: null },
       });
 
       if (!bubble) {
@@ -339,7 +327,7 @@ export class BubbleService {
 
       if (!(newPath === undefined || newPath === null || newPath === '')) {
         const tempBubble: Bubble = await prisma.bubble.findFirst({
-          where: { workspaceId: workspace.id, path: newPath },
+          where: { workspaceId: workspace.id, path: newPath, deletedAt: null },
         });
 
         if (tempBubble) {
@@ -354,7 +342,11 @@ export class BubbleService {
         let parentBubble: Bubble;
         if (parentPath !== '') {
           parentBubble = await prisma.bubble.findFirst({
-            where: { workspaceId: workspace.id, path: parentPath },
+            where: {
+              workspaceId: workspace.id,
+              path: parentPath,
+              deletedAt: null,
+            },
           });
 
           if (!parentBubble) {
@@ -423,6 +415,11 @@ export class BubbleService {
             fileId: picture.fileId,
           })),
       ].sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime());
+
+      await prisma.workspace.update({
+        where: { uuid: workspace.uuid },
+        data: { updatedAt: new Date() },
+      });
 
       return new GlobalResponseDto(
         'OK',

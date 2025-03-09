@@ -16,7 +16,6 @@ import { randomUUID } from 'crypto';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
 import { Readable } from 'stream';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { PictureWithBubble, pictureWithBubble } from 'src/picture/utils/types';
 import { User, Workspace } from '@prisma/client';
 
 @Injectable()
@@ -105,7 +104,7 @@ export class FileService {
       }
 
       const fileBuffer = await this.streamToBuffer(Body as Readable);
-      return new GlobalResponseDto('OK', '', { data: fileBuffer });
+      return new GlobalResponseDto('OK', '', fileBuffer);
     } catch (error) {
       throw new InternalServerErrorException('FILE: FILE DOWNLOAD FAILED');
     }

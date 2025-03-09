@@ -1,13 +1,11 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Patch,
   Param,
   Delete,
   UseGuards,
-  Query,
   Put,
 } from '@nestjs/common';
 import { CurveService } from './curve.service';
@@ -43,7 +41,7 @@ export class CurveController {
   async putCurve(
     @GetWorkspace() workspace: Workspace,
     @Body() putCurveDto: PutCurveDto,
-    @Query('curveId') curveId: number,
+    @Param('curveId') curveId: number,
   ): Promise<GlobalResponseDto> {
     return this.curveService.putCurve(workspace, putCurveDto, curveId);
   }
@@ -51,7 +49,7 @@ export class CurveController {
   @Delete('/:curveId')
   async deleteCurve(
     @GetWorkspace() workspace: Workspace,
-    @Query('curveId') curveId: number,
+    @Param('curveId') curveId: number,
   ): Promise<GlobalResponseDto> {
     return this.curveService.deleteCurve(workspace, curveId);
   }
@@ -59,7 +57,7 @@ export class CurveController {
   @Patch('/:curveId/restore')
   async restoreCurve(
     @GetWorkspace() workspace: Workspace,
-    @Query('curveId') curveId: number,
+    @Param('curveId') curveId: number,
   ): Promise<GlobalResponseDto> {
     return this.curveService.restoreCurve(workspace, curveId);
   }
