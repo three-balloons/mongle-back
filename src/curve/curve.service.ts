@@ -129,7 +129,7 @@ export class CurveService {
         throw new NotFoundException('CURVE: CURVE NOT FOUND');
       }
 
-      const deletedCurve = await tx.curve.update({
+      const restoredCurve = await tx.curve.update({
         where: { id: curveId },
         data: { deletedAt: null },
       });
@@ -142,7 +142,7 @@ export class CurveService {
         },
       });
 
-      return deletedCurve;
+      return restoredCurve;
     });
 
     return new GlobalResponseDto('OK', '', { curveId: result.id });

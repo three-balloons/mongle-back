@@ -244,7 +244,7 @@ export class BubbleService {
     pathDepth?: number,
   ) {
     const bubble: Bubble = await this.prisma.bubble.findUnique({
-      where: { workspaceId: workspace.id, id: bubbleId, deletedAt: null },
+      where: { workspaceId: workspace.id, id: bubbleId },
     });
 
     if (!bubble) {
@@ -316,7 +316,7 @@ export class BubbleService {
   ): Promise<GlobalResponseDto> {
     return this.prisma.$transaction(async (prisma) => {
       const bubble: Bubble = await prisma.bubble.findUnique({
-        where: { workspaceId: workspace.id, id: bubbleId, deletedAt: null },
+        where: { workspaceId: workspace.id, id: bubbleId },
       });
 
       if (!bubble) {
@@ -327,7 +327,7 @@ export class BubbleService {
 
       if (!(newPath === undefined || newPath === null || newPath === '')) {
         const tempBubble: Bubble = await prisma.bubble.findFirst({
-          where: { workspaceId: workspace.id, path: newPath, deletedAt: null },
+          where: { workspaceId: workspace.id, path: newPath },
         });
 
         if (tempBubble) {

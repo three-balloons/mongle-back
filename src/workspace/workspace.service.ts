@@ -88,7 +88,7 @@ export class WorkspaceService {
     putWorkspaceDto: PutWorkspaceDto,
   ) {
     const workspace: Workspace = await this.prisma.workspace.findFirst({
-      where: { uuid: workspaceId, deletedAt: null },
+      where: { uuid: workspaceId },
     });
 
     if (!workspace) {
@@ -118,7 +118,7 @@ export class WorkspaceService {
     workspaceId: string,
   ): Promise<GlobalResponseDto> {
     const workspace: Workspace = await this.prisma.workspace.findFirst({
-      where: { uuid: workspaceId, deletedAt: null },
+      where: { uuid: workspaceId },
     });
 
     if (!workspace) {
@@ -144,7 +144,7 @@ export class WorkspaceService {
     workspaceId: string,
   ): Promise<GlobalResponseDto> {
     const workspace: Workspace = await this.prisma.workspace.findFirst({
-      where: { uuid: workspaceId, deletedAt: { not: null } },
+      where: { uuid: workspaceId },
     });
 
     if (!workspace) {
