@@ -20,7 +20,7 @@ import { Workspace } from '@prisma/client';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
 import { PutCurveDto } from './dto/request/put-curve.dto';
 
-@Controller('curve')
+@Controller('/api/curves')
 @UseGuards(JwtAuthGuard, WorkspaceGuard)
 @ApiBearerAuth('jwt')
 @ApiHeader({

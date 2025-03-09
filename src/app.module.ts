@@ -8,6 +8,8 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { BubbleModule } from './bubble/bubble.module';
 import { CurveModule } from './curve/curve.module';
+import { FileModule } from './file/file.module';
+import { PictureModule } from './picture/picture.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { CurveModule } from './curve/curve.module';
     }),
     BubbleModule,
     CurveModule,
+    FileModule,
+    PictureModule,
   ],
   controllers: [AppController],
   providers: [AppService],
