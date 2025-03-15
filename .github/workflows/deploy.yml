@@ -22,8 +22,8 @@ jobs:
           script: |
             cd /home/ubuntu/mongle-back
             git pull origin main
-            docker stop mongle || true
-            docker rm mongle || true
-            docker rmi mongle || true
-            docker build -t mongle .
-            docker run -d -p 8080:8080 --name mongle mongle
+            sudo docker stop mongle || true
+            sudo docker rm mongle || true
+            sudo docker rmi mongle || true
+            sudo docker build -t mongle .
+            sudo docker run -d -p 8080:8080 --name mongle mongle
