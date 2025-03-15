@@ -30,7 +30,7 @@ async function bootstrap() {
   // Swagger setup
   const config = new DocumentBuilder()
     .setTitle('Mongle API')
-    .setDescription('Mongle Back API')
+    .setDescription('Mongle Back')
     .setVersion('1.0')
     .addBearerAuth(
       {
