@@ -1,0 +1,96 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+  Put,
+} from '@nestjs/common';
+import { BubbleService } from './bubble.service';
+import { WorkspaceGuard } from 'src/workspace/guard/workspace.guard';
+import { JwtAuthGuard } from 'src/user/guard/jwt.guard';
+import { ApiBearerAuth, ApiHeader, ApiQuery } from '@nestjs/swagger';
+import { Workspace } from '@prisma/client';
+import { GetWorkspace } from 'src/utils/decorator/get-workspace.decorator';
+import { PostBubbleDto } from './dto/request/post-bubble.dto';
+import { GlobalResponseDto } from 'src/utils/dto/response.dto';
+import { PutBubbleDto } from './dto/request/put-bubble.dto';
+
+@Controller('api/bubbles')
+@UseGuards(JwtAuthGuard, WorkspaceGuard)
+@ApiBearerAuth('jwt')
+@ApiHeader({
+  name: 'workspaceId',
+  description: 'workspaceId',
+  required: true,
+})
+export class BubbleController {
+  constructor(private readonly bubbleService: BubbleService) {}
+
+  @Post()
+  async postBubble(
+    @GetWorkspace() workspace: Workspace,
+    @Body() postBubbleDto: PostBubbleDto,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.postBubble(workspace, postBubbleDto);
+  }
+
+  @Delete('/:bubbleId')
+  async deleteBubbleById(
+    @GetWorkspace() workspace: Workspace,
+    @Param('bubbleId') bubbleId: number,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.deleteBubbleById(workspace, bubbleId);
+  }
+
+  @Patch('/:bubbleId/restore')
+  async restoreBubbleById(
+    @GetWorkspace() workspace: Workspace,
+    @Param('bubbleId') bubbleId: number,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.restoreBubbleById(workspace, bubbleId);
+  }
+
+  @Get()
+  @ApiQuery({ name: 'pathDepth', required: false })
+  async getBubbles(
+    @GetWorkspace() workspace: Workspace,
+    @Query('pathDepth') pathDepth?: number,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.getBubbles(
+      workspace,
+      pathDepth !== undefined ? pathDepth : undefined,
+    );
+  }
+
+  @Get('/:bubbleId')
+  @ApiQuery({ name: 'pathDepth', required: false })
+  async getBubbleById(
+    @GetWorkspace() workspace: Workspace,
+    @Param('bubbleId') bubbleId: number,
+    @Query('pathDepth') pathDepth?: number,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.getBubbleById(
+      workspace,
+      bubbleId,
+      pathDepth !== undefined ? pathDepth : undefined,
+    );
+  }
+
+  @Put('/:bubbleId')
+  async putBubbleById(
+    @GetWorkspace() workspace: Workspace,
+    @Param('bubbleId') bubbleId: number,
+    @Body() putBubbleDto: PutBubbleDto,
+  ): Promise<GlobalResponseDto> {
+    return await this.bubbleService.putBubbleById(
+      workspace,
+      bubbleId,
+      putBubbleDto,
+    );
+  }
+}
