@@ -12,7 +12,7 @@ async function bootstrap() {
     origin: ['http://localhost:5173', 'https://app.mongle.xyz'],
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Authorization',
+    allowedHeaders: 'Content-Type, Authorization, workspaceId',
   });
 
   app.use(express.json());
