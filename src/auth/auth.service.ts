@@ -51,7 +51,7 @@ export class AuthService {
         params: {
           grant_type: 'authorization_code',
           client_id: kakaoClientId,
-          redirect_uri: request.redirect_uri,
+          redirect_uri: request.redirectUri,
           code: request.code,
           client_secret: kakaoClientSecret,
         },
@@ -77,7 +77,7 @@ export class AuthService {
           code: request.code,
           client_id: googleClientId,
           client_secret: googleClientSecret,
-          redirect_uri: request.redirect_uri,
+          redirect_uri: request.redirectUri,
           grant_type: 'authorization_code',
         },
       }),

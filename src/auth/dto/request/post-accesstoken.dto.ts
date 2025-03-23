@@ -12,5 +12,5 @@ export class PostAccessTokenDto {
 
   @ApiProperty({ example: 'https://your-redirect-uri.com/callback' })
   @IsString()
-  redirect_uri: string;
+  redirectUri: string;
 }
