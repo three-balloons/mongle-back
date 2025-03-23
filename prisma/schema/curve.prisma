@@ -4,7 +4,7 @@ model Curve {
     updatedAt DateTime  @updatedAt
     deletedAt DateTime?
     color     String
-    position  String
+    position  String    @db.Text
     thickness Int
     bubbleId  Int
     bubble    Bubble    @relation(fields: [bubbleId], references: [id])
