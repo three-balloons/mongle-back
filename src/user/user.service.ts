@@ -1,17 +1,39 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PutUserDto } from './dto/request/put-user.dto';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
+import { userWithRoles, UserWithRoles } from './utils/prisma-types';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findByOAuthId(oAuthId: string): Promise<User> {
+  async findByOAuthIdWithRoles(oAuthId: string): Promise<UserWithRoles> {
     return await this.prisma.user.findFirst({
       where: { oAuthId, deletedAt: null },
+      ...userWithRoles,
     });
+  }
+
+  async findUserByNameAndEmail(
+    name: string,
+    email: string,
+  ): Promise<GlobalResponseDto> {
+    const user: User = await this.prisma.user.findFirst({
+      where: {
+        name,
+        email,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('USER: User Not Found');
+    }
+
+    const { provider, oAuthId, refreshToken, ...filteredUser } = user;
+
+    return new GlobalResponseDto('OK', '', filteredUser);
   }
 
   async putUser(

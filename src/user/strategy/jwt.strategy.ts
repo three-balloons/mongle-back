@@ -4,6 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user.service';
 import { User } from '@prisma/client';
+import { UserWithRoles } from '../utils/prisma-types';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -19,7 +20,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: any): Promise<User> {
-    const user = await this.userService.findByOAuthId(payload.sub);
+    const user: UserWithRoles = await this.userService.findByOAuthIdWithRoles(
+      payload.sub,
+    );
     if (!user) {
       throw new UnauthorizedException('AUTHORIZATON: INVALID TOKEN');
     }

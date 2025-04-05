@@ -6,6 +6,7 @@ import {
   NotFoundException,
   BadRequestException,
   UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Response } from 'express';
 
@@ -32,6 +33,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof UnauthorizedException) {
       errorResponse = {
         code: 'UnAuthorized',
+        message: exception.message,
+        data: {},
+      };
+    } else if (exception instanceof ForbiddenException) {
+      errorResponse = {
+        code: 'Forbidden',
         message: exception.message,
         data: {},
       };
