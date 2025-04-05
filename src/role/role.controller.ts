@@ -21,7 +21,6 @@ import { GlobalResponseDto } from 'src/utils/dto/response.dto';
 import { Roles } from 'src/utils/decorator/role.decorator';
 import { GetWorkspace } from 'src/utils/decorator/get-workspace.decorator';
 import { PutRoleDto } from './dto/request/put-role.dto';
-import { DeleteRoleDto } from './dto/request/delete-role.dto';
 
 @Controller('api/roles')
 export class RoleController {
@@ -65,14 +64,14 @@ export class RoleController {
     description: 'workspaceId',
     required: true,
   })
-  @Delete()
+  @Delete('/:userId')
   @UseGuards(JwtAuthGuard, RoleGuard)
   @Roles(RoleType.OWNER)
   async deleteRole(
-    @Body() deleteRoleDto: DeleteRoleDto,
+    @Param('userId') userId: number,
     @GetWorkspace() workspace: Workspace,
   ): Promise<GlobalResponseDto> {
-    return await this.roleService.deleteRole(deleteRoleDto, workspace.id);
+    return await this.roleService.deleteRole(userId, workspace.id);
   }
 
   @ApiBearerAuth('jwt')

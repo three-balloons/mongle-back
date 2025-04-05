@@ -1,14 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostRoleDto } from './dto/request/post-role.dto';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
 import { Role } from '@prisma/client';
 import { PutRoleDto } from './dto/request/put-role.dto';
-import { DeleteRoleDto } from './dto/request/delete-role.dto';
 import { RoleWithUsers, roleWithUsers } from './utils/prisma-types';
 
 @Injectable()
@@ -75,13 +70,13 @@ export class RoleService {
   }
 
   async deleteRole(
-    deleteRoleDto: DeleteRoleDto,
+    userId: number,
     workspaceId: number,
   ): Promise<GlobalResponseDto> {
     await this.prisma.role.delete({
       where: {
         userId_workspaceId: {
-          userId: deleteRoleDto.userId,
+          userId,
           workspaceId,
         },
       },
