@@ -6,7 +6,6 @@ model Workspace {
     name      String
     theme     String
     uuid      String    @unique @default(uuid())
-    userId    Int
-    user      User      @relation(fields: [userId], references: [id])
+    roles     Role[]
     bubbles   Bubble[]
 }

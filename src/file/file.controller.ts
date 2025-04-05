@@ -19,10 +19,11 @@ import {
 import { PostImageDto } from './dto/request/post-image.dto';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
 import { JwtAuthGuard } from 'src/user/guard/jwt.guard';
-import { WorkspaceGuard } from 'src/workspace/guard/workspace.guard';
 import { GetWorkspace } from 'src/utils/decorator/get-workspace.decorator';
-import { User, Workspace } from '@prisma/client';
+import { RoleType, User, Workspace } from '@prisma/client';
 import { GetUser } from 'src/utils/decorator/get-user.decorator';
+import { RoleGuard } from 'src/user/guard/role.guard';
+import { Roles } from 'src/utils/decorator/role.decorator';
 
 @Controller('/api/files/')
 @UseGuards(JwtAuthGuard)
@@ -44,7 +45,8 @@ export class FileController {
   }
 
   @Get('/:fileId')
-  @UseGuards(WorkspaceGuard)
+  @UseGuards(RoleGuard)
+  @Roles(RoleType.VIEWER, RoleType.EDITOR, RoleType.OWNER)
   @ApiHeader({
     name: 'workspaceId',
     description: 'workspaceId',

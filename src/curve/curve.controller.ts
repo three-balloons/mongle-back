@@ -11,15 +11,16 @@ import {
 import { CurveService } from './curve.service';
 import { PostCurveDto } from './dto/request/post-curve.dto';
 import { JwtAuthGuard } from 'src/user/guard/jwt.guard';
-import { WorkspaceGuard } from 'src/workspace/guard/workspace.guard';
 import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { GetWorkspace } from 'src/utils/decorator/get-workspace.decorator';
-import { Workspace } from '@prisma/client';
+import { RoleType, Workspace } from '@prisma/client';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
 import { PutCurveDto } from './dto/request/put-curve.dto';
+import { RoleGuard } from 'src/user/guard/role.guard';
+import { Roles } from 'src/utils/decorator/role.decorator';
 
 @Controller('/api/curves')
-@UseGuards(JwtAuthGuard, WorkspaceGuard)
+@UseGuards(JwtAuthGuard, RoleGuard)
 @ApiBearerAuth('jwt')
 @ApiHeader({
   name: 'workspaceId',
@@ -30,6 +31,7 @@ export class CurveController {
   constructor(private readonly curveService: CurveService) {}
 
   @Post()
+  @Roles(RoleType.OWNER, RoleType.EDITOR)
   async postCurve(
     @GetWorkspace() workspace: Workspace,
     @Body() postCurveDto: PostCurveDto,
@@ -38,6 +40,7 @@ export class CurveController {
   }
 
   @Put('/:curveId')
+  @Roles(RoleType.OWNER, RoleType.EDITOR)
   async putCurve(
     @GetWorkspace() workspace: Workspace,
     @Body() putCurveDto: PutCurveDto,
@@ -47,6 +50,7 @@ export class CurveController {
   }
 
   @Delete('/:curveId')
+  @Roles(RoleType.OWNER, RoleType.EDITOR)
   async deleteCurve(
     @GetWorkspace() workspace: Workspace,
     @Param('curveId') curveId: number,
@@ -55,6 +59,7 @@ export class CurveController {
   }
 
   @Patch('/:curveId/restore')
+  @Roles(RoleType.OWNER, RoleType.EDITOR)
   async restoreCurve(
     @GetWorkspace() workspace: Workspace,
     @Param('curveId') curveId: number,

@@ -11,17 +11,18 @@ import {
   Put,
 } from '@nestjs/common';
 import { BubbleService } from './bubble.service';
-import { WorkspaceGuard } from 'src/workspace/guard/workspace.guard';
 import { JwtAuthGuard } from 'src/user/guard/jwt.guard';
 import { ApiBearerAuth, ApiHeader, ApiQuery } from '@nestjs/swagger';
-import { Workspace } from '@prisma/client';
+import { RoleType, Workspace } from '@prisma/client';
 import { GetWorkspace } from 'src/utils/decorator/get-workspace.decorator';
 import { PostBubbleDto } from './dto/request/post-bubble.dto';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
 import { PutBubbleDto } from './dto/request/put-bubble.dto';
+import { RoleGuard } from 'src/user/guard/role.guard';
+import { Roles } from 'src/utils/decorator/role.decorator';
 
 @Controller('api/bubbles')
-@UseGuards(JwtAuthGuard, WorkspaceGuard)
+@UseGuards(JwtAuthGuard, RoleGuard)
 @ApiBearerAuth('jwt')
 @ApiHeader({
   name: 'workspaceId',
@@ -32,6 +33,7 @@ export class BubbleController {
   constructor(private readonly bubbleService: BubbleService) {}
 
   @Post()
+  @Roles(RoleType.OWNER, RoleType.EDITOR)
   async postBubble(
     @GetWorkspace() workspace: Workspace,
     @Body() postBubbleDto: PostBubbleDto,
@@ -40,6 +42,7 @@ export class BubbleController {
   }
 
   @Delete('/:bubbleId')
+  @Roles(RoleType.OWNER, RoleType.EDITOR)
   async deleteBubbleById(
     @GetWorkspace() workspace: Workspace,
     @Param('bubbleId') bubbleId: number,
@@ -48,6 +51,7 @@ export class BubbleController {
   }
 
   @Patch('/:bubbleId/restore')
+  @Roles(RoleType.OWNER, RoleType.EDITOR)
   async restoreBubbleById(
     @GetWorkspace() workspace: Workspace,
     @Param('bubbleId') bubbleId: number,
@@ -56,6 +60,7 @@ export class BubbleController {
   }
 
   @Get()
+  @Roles(RoleType.VIEWER, RoleType.EDITOR, RoleType.OWNER)
   @ApiQuery({ name: 'pathDepth', required: false })
   async getBubbles(
     @GetWorkspace() workspace: Workspace,
@@ -68,6 +73,7 @@ export class BubbleController {
   }
 
   @Get('/:bubbleId')
+  @Roles(RoleType.VIEWER, RoleType.EDITOR, RoleType.OWNER)
   @ApiQuery({ name: 'pathDepth', required: false })
   async getBubbleById(
     @GetWorkspace() workspace: Workspace,
@@ -82,6 +88,7 @@ export class BubbleController {
   }
 
   @Put('/:bubbleId')
+  @Roles(RoleType.OWNER, RoleType.EDITOR)
   async putBubbleById(
     @GetWorkspace() workspace: Workspace,
     @Param('bubbleId') bubbleId: number,

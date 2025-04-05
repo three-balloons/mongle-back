@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -14,6 +15,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
 import { GetUser } from 'src/utils/decorator/get-user.decorator';
 import { PutUserDto } from './dto/request/put-user.dto';
+import { SearchUserDto } from './dto/request/search-user.dto';
 
 @Controller('api/users')
 export class UserController {
@@ -25,6 +27,18 @@ export class UserController {
   getUser(@GetUser() user): GlobalResponseDto {
     const { oAuthId, refreshToken, ...filteredUser } = user;
     return new GlobalResponseDto('OK', '', filteredUser);
+  }
+
+  @Get('/search')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('jwt')
+  async getUserByNameAndEmail(
+    @Query() searchUserDto: SearchUserDto,
+  ): Promise<GlobalResponseDto> {
+    return await this.userService.findUserByNameAndEmail(
+      searchUserDto.name,
+      searchUserDto.email,
+    );
   }
 
   @Put()

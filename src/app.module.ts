@@ -10,6 +10,7 @@ import { BubbleModule } from './bubble/bubble.module';
 import { CurveModule } from './curve/curve.module';
 import { FileModule } from './file/file.module';
 import { PictureModule } from './picture/picture.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PictureModule } from './picture/picture.module';
     CurveModule,
     FileModule,
     PictureModule,
+    RoleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
