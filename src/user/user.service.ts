@@ -35,7 +35,7 @@ export class UserService {
     });
 
     const filteredUsers = users.map(
-      ({ provider, oAuthId, refreshToken, ...filteredUser }) => filteredUser,
+      ({ oAuthId, refreshToken, ...filteredUser }) => filteredUser,
     );
 
     return new GlobalResponseDto('OK', '', filteredUsers);
