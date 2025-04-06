@@ -75,19 +75,6 @@ export class RoleController {
   }
 
   @ApiBearerAuth('jwt')
-  @ApiHeader({
-    name: 'workspaceId',
-    description: 'workspaceId',
-    required: true,
-  })
-  @Get()
-  @UseGuards(JwtAuthGuard, RoleGuard)
-  @Roles(RoleType.VIEWER, RoleType.EDITOR, RoleType.OWNER)
-  async getRole(@Req() req: Request): Promise<GlobalResponseDto> {
-    return new GlobalResponseDto('OK', '', req['userRole']);
-  }
-
-  @ApiBearerAuth('jwt')
   @Get('/:workspaceId')
   @UseGuards(JwtAuthGuard)
   async getRoleByWorkspaceId(

@@ -2,9 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostRoleDto } from './dto/request/post-role.dto';
 import { GlobalResponseDto } from 'src/utils/dto/response.dto';
-import { Role } from '@prisma/client';
+import { Role, RoleType } from '@prisma/client';
 import { PutRoleDto } from './dto/request/put-role.dto';
-import { RoleWithUsers, roleWithUsers } from './utils/prisma-types';
+import {
+  roleWithUser,
+  RoleWithUser,
+  roleWithWorkspace,
+  RoleWithWorkspace,
+} from './utils/prisma-types';
 
 @Injectable()
 export class RoleService {
@@ -26,15 +31,22 @@ export class RoleService {
       throw new BadRequestException('ROLE: ALREADY EXISTS');
     }
 
-    const createdRole: Role = await this.prisma.role.create({
+    const createdRole: RoleWithWorkspace = await this.prisma.role.create({
       data: {
         user: { connect: { id: postRoleDto.userId } },
         workspace: { connect: { id: workspaceId } },
         roleType: postRoleDto.role,
       },
+      ...roleWithWorkspace,
     });
 
-    return new GlobalResponseDto('OK', '', createdRole);
+    const filteredRole = {
+      roleType: createdRole.roleType,
+      userId: createdRole.userId,
+      workspaceId: createdRole.workspace.uuid,
+    };
+
+    return new GlobalResponseDto('OK', '', filteredRole);
   }
 
   async putRole(
@@ -54,7 +66,11 @@ export class RoleService {
       throw new BadRequestException('ROLE: NOT FOUND');
     }
 
-    const changedRole = await this.prisma.role.update({
+    if (role.roleType == RoleType.OWNER) {
+      throw new BadRequestException('ROLE: ROLETYPE OWNER CANNOT BE CHANGED');
+    }
+
+    const changedRole: RoleWithWorkspace = await this.prisma.role.update({
       where: {
         userId_workspaceId: {
           userId: putRoleDto.userId,
@@ -64,15 +80,39 @@ export class RoleService {
       data: {
         roleType: putRoleDto.role,
       },
+      ...roleWithWorkspace,
     });
 
-    return new GlobalResponseDto('OK', '', changedRole);
+    const filteredRole = {
+      roleType: changedRole.roleType,
+      userId: changedRole.userId,
+      workspaceId: changedRole.workspace.uuid,
+    };
+
+    return new GlobalResponseDto('OK', '', filteredRole);
   }
 
   async deleteRole(
     userId: number,
     workspaceId: number,
   ): Promise<GlobalResponseDto> {
+    const role = await this.prisma.role.findUnique({
+      where: {
+        userId_workspaceId: {
+          userId,
+          workspaceId,
+        },
+      },
+    });
+
+    if (!role) {
+      throw new BadRequestException('ROLE: NOT FOUND');
+    }
+
+    if (role.roleType == RoleType.OWNER) {
+      throw new BadRequestException('ROLE: ROLETYPE OWNER CANNOT BE DELETED');
+    }
+
     await this.prisma.role.delete({
       where: {
         userId_workspaceId: {
@@ -86,24 +126,22 @@ export class RoleService {
   }
 
   async getRolesByWorkspaceId(workspaceId: string): Promise<GlobalResponseDto> {
-    const roles: RoleWithUsers[] = await this.prisma.role.findMany({
+    const roles: RoleWithUser[] = await this.prisma.role.findMany({
       where: { workspace: { uuid: workspaceId } },
-      ...roleWithUsers,
+      ...roleWithUser,
     });
 
     const groupedRoles = {
-      OWNER: [] as { email: string; name: string }[],
-      EDITOR: [] as { email: string; name: string }[],
-      VIEWER: [] as { email: string; name: string }[],
+      owner: [] as { email: string; name: string }[],
+      editor: [] as { email: string; name: string }[],
+      viewer: [] as { email: string; name: string }[],
     };
 
     roles.forEach((role) => {
-      const key = role.roleType as keyof typeof groupedRoles;
+      const key = role.roleType.toLowerCase() as keyof typeof groupedRoles;
       if (groupedRoles[key]) {
-        groupedRoles[key].push({
-          email: role.user.email,
-          name: role.user.name,
-        });
+        const { oAuthId, refreshToken, ...filteredUser } = role.user;
+        groupedRoles[key].push(filteredUser);
       }
     });
 

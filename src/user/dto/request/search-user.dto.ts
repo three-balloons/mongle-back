@@ -1,12 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class SearchUserDto {
-  @ApiProperty({ example: '진혁' })
+  @ApiProperty({ example: '진혁', required: false })
+  @IsOptional()
   @IsString()
-  name: string;
+  name?: string;
 
-  @ApiProperty({ example: 'kmer1024@hanyang.ac.kr' })
-  @IsEmail()
-  email: string;
+  @ApiProperty({ example: 'kmer1024@hanyang.ac.kr', required: false })
+  @IsOptional()
+  @IsString()
+  email?: string;
 }

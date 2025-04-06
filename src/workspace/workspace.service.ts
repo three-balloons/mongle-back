@@ -45,25 +45,32 @@ export class WorkspaceService {
 
     const workspaceResponseDto: WorkspaceResponseDto = new WorkspaceResponseDto(
       result.workspace,
+      RoleType.OWNER,
     );
 
     return new GlobalResponseDto('OK', '', workspaceResponseDto);
   }
 
   async getWorkspaces(user: User): Promise<GlobalResponseDto> {
-    const workspaces: Workspace[] = await this.prisma.workspace.findMany({
-      where: {
-        roles: {
-          some: {
-            userId: user.id,
+    const workspaces: WorkspaceWithRoles[] =
+      await this.prisma.workspace.findMany({
+        where: {
+          roles: {
+            some: {
+              userId: user.id,
+            },
           },
+          deletedAt: null,
         },
-        deletedAt: null,
-      },
-    });
+        ...workspaceWithRoles,
+      });
 
     const workspacesResponseDto = workspaces.map(
-      (workspace) => new WorkspaceResponseDto(workspace),
+      (workspace) =>
+        new WorkspaceResponseDto(
+          workspace,
+          workspace.roles.find((role) => role.userId === user.id).roleType,
+        ),
     );
 
     return new GlobalResponseDto('OK', '', workspacesResponseDto);
@@ -86,23 +93,23 @@ export class WorkspaceService {
       throw new NotFoundException('WORKSPACE: NOT FOUND');
     }
 
-    const isAuthorized = workspace.roles.some(
-      (role) => role.userId === user.id,
-    );
-    if (!isAuthorized) {
+    const userRole = workspace.roles.find((role) => role.userId === user.id);
+
+    if (!userRole) {
       throw new UnauthorizedException('WORKSPACE: UNAUTHORIZED USER');
     }
 
     const workspaceResponseDto: WorkspaceResponseDto = new WorkspaceResponseDto(
       workspace,
+      userRole.roleType,
     );
 
     return new GlobalResponseDto('OK', '', workspaceResponseDto);
   }
 
   async getDeletedWorkspaces(user: User) {
-    const deletedWorkspaces: Workspace[] = await this.prisma.workspace.findMany(
-      {
+    const deletedWorkspaces: WorkspaceWithRoles[] =
+      await this.prisma.workspace.findMany({
         where: {
           roles: {
             some: {
@@ -111,11 +118,15 @@ export class WorkspaceService {
           },
           deletedAt: { not: null },
         },
-      },
-    );
+        ...workspaceWithRoles,
+      });
 
     const workspacesResponseDto = deletedWorkspaces.map(
-      (workspace) => new WorkspaceResponseDto(workspace),
+      (workspace) =>
+        new WorkspaceResponseDto(
+          workspace,
+          workspace.roles.find((role) => role.userId === user.id).roleType,
+        ),
     );
 
     return new GlobalResponseDto('OK', '', workspacesResponseDto);
@@ -157,6 +168,7 @@ export class WorkspaceService {
 
     const workspaceResponseDto: WorkspaceResponseDto = new WorkspaceResponseDto(
       updatedWorkspace,
+      userRole.roleType,
     );
 
     return new GlobalResponseDto('OK', '', workspaceResponseDto);
