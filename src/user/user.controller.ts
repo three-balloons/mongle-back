@@ -25,7 +25,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('jwt')
   getUser(@GetUser() user): GlobalResponseDto {
-    const { oAuthId, refreshToken, ...filteredUser } = user;
+    const { oAuthId, refreshToken, roles, ...filteredUser } = user;
     return new GlobalResponseDto('OK', '', filteredUser);
   }
 
@@ -35,7 +35,7 @@ export class UserController {
   async getUserByNameAndEmail(
     @Query() searchUserDto: SearchUserDto,
   ): Promise<GlobalResponseDto> {
-    return await this.userService.findUserByNameAndEmail(
+    return await this.userService.findUsersByNameAndEmail(
       searchUserDto.name,
       searchUserDto.email,
     );

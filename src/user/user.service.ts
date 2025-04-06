@@ -16,24 +16,29 @@ export class UserService {
     });
   }
 
-  async findUserByNameAndEmail(
-    name: string,
-    email: string,
+  async findUsersByNameAndEmail(
+    name?: string,
+    email?: string,
   ): Promise<GlobalResponseDto> {
-    const user: User = await this.prisma.user.findFirst({
-      where: {
-        name,
-        email,
-      },
-    });
+    const filterCondition: any = {};
 
-    if (!user) {
-      throw new NotFoundException('USER: User Not Found');
+    if (name) {
+      filterCondition.name = { contains: name };
     }
 
-    const { provider, oAuthId, refreshToken, ...filteredUser } = user;
+    if (email) {
+      filterCondition.email = { contains: email };
+    }
 
-    return new GlobalResponseDto('OK', '', filteredUser);
+    const users: User[] = await this.prisma.user.findMany({
+      where: filterCondition,
+    });
+
+    const filteredUsers = users.map(
+      ({ oAuthId, refreshToken, ...filteredUser }) => filteredUser,
+    );
+
+    return new GlobalResponseDto('OK', '', filteredUsers);
   }
 
   async putUser(
