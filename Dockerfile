@@ -1,6 +1,9 @@
 # Use the official Node.js image as the base image
 FROM node:20
 
+# MySQL 클라이언트 설치 (Debian/Ubuntu 기반)
+RUN apt-get update && apt-get install -y default-mysql-client
+
 # Set the working directory inside the container
 WORKDIR /usr/src/app
 
@@ -14,7 +17,6 @@ RUN npm install
 COPY . .
 
 RUN npx prisma generate
-RUN npx prisma migrate deploy
 
 # Build the NestJS application
 RUN npm run build
@@ -23,4 +25,4 @@ RUN npm run build
 EXPOSE 8080
 
 # Command to run the application
-CMD ["node", "dist/main"]
+CMD ["sh", "start.sh"]
